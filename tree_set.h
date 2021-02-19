@@ -1,7 +1,16 @@
 #include <stdbool.h>
+#include <stddef.h>
 
-//Struct pointer representing the treeset structure.
+
+/*
+ * Type definition of a struct pointer encapsulating the set
+ * structure.
+ */
 typedef struct _tree_set* TreeSet;
+
+//TEMP DEBUG FUNCTIONS ---------------------------------
+void apply(TreeSet, void*);
+//------------------------------------------------------
 
 
 /*
