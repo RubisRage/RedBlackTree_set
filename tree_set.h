@@ -1,7 +1,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-
 /*
  * Type definition of a struct pointer encapsulating the set
  * structure.

@@ -1,13 +1,14 @@
 CC = gcc
 CFLAGS = -g -Wall 
+
+BIN = main
 SRC := $(wildcard *.c)
-BIN := main
 OBJS := $(SRC:.c=.o) 
 
-.PHONY: clean all 
+.PHONY: clean 
 
-comp: $(OBJS)
-	$(CC) $(CFLAGS) $^ 
+$(BIN): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $(BIN)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<

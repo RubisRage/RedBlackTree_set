@@ -9,7 +9,7 @@
  */
 typedef unsigned char color_t;
 static const color_t RED = 0;
-//static const color_t BLACK = 1; //NOT IN USE YET
+static const color_t BLACK = 1; 
 
 
 /*
@@ -57,18 +57,19 @@ typedef struct _tree_set
 
 
 //PRIVATE FUNCTION DECLARATIONS
-void _remove_nodes(Node n, bool free_elements);
-bool _set_contains(Node n, cmpf_t cmp, void* e); 
-bool _set_add(Node, cmpf_t, void*);
-Node _create_node(void* value);
-Node _bst_insertion(Node* root, cmpf_t cmp, void* e);
+static void _remove_nodes(Node n, bool free_elements);
+static bool _set_contains(Node n, cmpf_t cmp, void* e); 
+static Node _create_node(void* value);
+static Node _bst_insertion(Node* root, cmpf_t cmp, void* e);
+static void _restructure(TreeSet t, Node father);
+static void _simple_rotation(TreeSet t, Node father, Node gf, bool leftcase);
 
 
 /*
  * Creates a new TreeSet instance. 
  *
  * Arguments: 	cmp - Pointer refering the function used to 
- * 		used to compare the elements of the set. This
+ * 		compare the elements of the set. This
  *		function must have the following interface:
  *		int func(E,E) where E is the type of the 
  *		element. 
@@ -88,7 +89,7 @@ TreeSet create_treeset(void* cmp)
  * Creates a new node initializated to contain the specified 
  * value.
  */
-Node _create_node(void* value)
+static Node _create_node(void* value)
 {
 	Node n = malloc(sizeof(_node));
 	n->father = NULL;
@@ -101,17 +102,96 @@ Node _create_node(void* value)
 
 /*
  * Adds the element referenced by the passed pointer to this 
- * set if not already present. Returns true if added, false
- * other wise.
+ * set if not already present, this function may modify the
+ * tree's structure to maintain red-black trees properties.
+ * Returns true if added, false other wise.
  */
 bool set_add(TreeSet t, void* e)
 {
-	if(_bst_insertion(&t->root, t->cmp, e)==NULL)
+	Node new = _bst_insertion(&t->root, t->cmp, e);
+	if(new==NULL)
 		return false;
+
+	if(new!=t->root && new->father->color==RED) _restructure(t, new);
+
+	t->root->color = BLACK;
 	return true;
 }
 
-Node _bst_insertion(Node* root, cmpf_t cmp, void* e)
+static void _restructure(TreeSet t, Node son)
+{
+	char rcase;
+	Node father = son->father;
+	Node gf = father->father;
+	//Store on rcase if father is right son(1) or left son(0)
+	Node uncle = (rcase=(father==gf->sons[right]))? gf->sons[left]:gf->sons[right];
+
+	if(uncle != NULL && uncle->color==RED)
+	{
+		father->color = uncle->color = BLACK;
+		return;
+	}
+
+	/*Compute case based on relative positions between father,
+	  uncle and grandfather */
+	rcase = (rcase<<1)|(son==father->sons[right]);
+
+	#define LLCASE 0x0
+	#define LRCASE 0x1
+	#define RLCASE 0x2
+	#define RRCASE 0x3
+
+	//PRINT STATEMENTS FOR DEBUGGING
+	switch(rcase)
+	{
+		case LLCASE: printf("LLCASE\n");
+			_simple_rotation(t, father, gf, true);
+		break;
+		case LRCASE: printf("LRCASE\n");
+		{
+			father->sons[right] = NULL;
+			son->sons[left] = father;
+			_simple_rotation(t, son, gf, true);
+		}
+		break;
+		case RLCASE: printf("RLCASE\n");
+		{
+			father->sons[left] = NULL;
+			son->sons[right] = father;
+			_simple_rotation(t, son, gf, false);
+		}
+		break;
+		case RRCASE: printf("RRCASE\n");
+			_simple_rotation(t, father, gf, false);
+		break;
+	}
+}
+
+static void _simple_rotation(TreeSet t, Node father, Node gf, bool leftcase)
+{
+	
+		father->color = BLACK;
+		gf->color = RED;
+
+		int branch = leftcase? left:right;
+
+		gf->sons[branch] = NULL;
+		father->sons[!branch] = gf;
+		
+		Node subroot = gf->father;
+		if(subroot==NULL)
+			t->root = father;
+		else
+		{
+			branch = subroot->sons[right]==gf? right:left;
+			subroot->sons[branch] = father;
+		}
+}
+
+/*
+ * Implements basic binary search tree insertion. 
+ */
+static Node _bst_insertion(Node* root, cmpf_t cmp, void* e)
 {
 	if(*root==NULL)
 	{
@@ -124,8 +204,8 @@ Node _bst_insertion(Node* root, cmpf_t cmp, void* e)
 
 	while(next!=NULL)
 	{
-		c = cmp(next->value, e);
 		current = next;
+		c = cmp(current->value, e);
 
 		if(c>0)
 			next = next->sons[left];
@@ -143,10 +223,6 @@ Node _bst_insertion(Node* root, cmpf_t cmp, void* e)
 	return new;
 }
 
-bool _set_add(Node n, cmpf_t cmp, void* e)
-{
-	return false;
-}
 
 /*
  * Removes all elements from this set. If specified by the
@@ -156,10 +232,15 @@ bool _set_add(Node n, cmpf_t cmp, void* e)
 void set_clear(TreeSet t, bool free_elements)
 {
 	_remove_nodes(t->root, free_elements);
+	t->root = NULL;
 }
 
-
-void _remove_nodes(Node n, bool free_elements)
+/*
+ * Recursively removes every node from the tree. If
+ * the free_elements flag is true then the memory 
+ * allocated for the inserted values is also freed.
+ */
+static void _remove_nodes(Node n, bool free_elements)
 {
 	if(n==NULL) return;
 
@@ -186,7 +267,7 @@ bool set_contains(TreeSet t, void* e)
  * function is used to check for equality. Returns true if 
  * contained, false otherwise.
  */
-bool _set_contains(Node n, cmpf_t cmp, void* e)
+static bool _set_contains(Node n, cmpf_t cmp, void* e)
 {
 	if(n==NULL) 
 		return false;
@@ -234,6 +315,7 @@ void _apply(Node n, void (*f)(void*))
 	if(n==NULL) return;
 
 	_apply(n->sons[left], f);
+	printf("color: %s -> ", n->color==RED? "RED":"BLACK");
 	f(n->value);
 	_apply(n->sons[right], f);
 }
