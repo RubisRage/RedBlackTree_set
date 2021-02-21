@@ -10,6 +10,11 @@ static Node _bst_insertion(Node* root, cmpf_t cmp, void* e);
 static void _restructure(TreeSet t, Node father);
 static void _simple_rotation(TreeSet t, Node father, Node gf, bool leftcase);
 
+void perrorx(const char* s)
+{
+	perror(s);
+	exit(EXIT_FAILURE);
+}
 
 /*
  * Creates a new TreeSet instance. 
@@ -23,6 +28,7 @@ static void _simple_rotation(TreeSet t, Node father, Node gf, bool leftcase);
 TreeSet create_treeset(void* cmp)
 {
 	TreeSet t = malloc(sizeof(_tree_set));
+	if(t==NULL) perrorx("Not enough memory to create a new TreeSet. Aborting.");
 	t->root = NULL;
 	t->size = 0;
 	t->cmp = (cmpf_t) cmp; 
@@ -38,6 +44,7 @@ TreeSet create_treeset(void* cmp)
 static Node _create_node(void* value)
 {
 	Node n = malloc(sizeof(_node));
+	if(n==NULL) perrorx("Not enough memory to create a new node. Aborting.");
 	n->father = NULL;
 	n->sons[right] = n->sons[left] = NULL;
 	n->color = RED;
@@ -285,22 +292,5 @@ void apply(TreeSet t, void* f)
 	_apply(t->root, (void (*)(void*)) f);
 }
 //------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
