@@ -1,64 +1,10 @@
 #include <stdio.h> //DEBUG LIBRARY
 #include <stdlib.h>
-#include "tree_set.h"
+#include "private_treeset.h"
 
 
-/*
- * Node color type definition. Designed to be used in combination
- * with the negation operator(!): RED = !BLACK <=> BLACK = !RED.
- */
-typedef unsigned char color_t;
-static const color_t RED = 0;
-static const color_t BLACK = 1; 
-
-
-/*
- * Compare function type definition. This function must accept 
- * two arguments of the stored type and return an integer greater
- * than, equal to or lower than 0 if, respectively, the argument 
- * item is greater than, equal to or lower than the second argument.
- */
-typedef int (*cmpf_t)(void*,void*);
-
-/*
- * Data collection representing a tree node. Every node holds a 
- * pointer to the data that is containing as well as its own color
- * which is either RED(0) or BLACK(1).
- */
-typedef struct _node
-{
-	void* value;
-	color_t color;
-	struct _node* father;
-	struct _node* sons[2];
-} _node; 
-
-//Convenience type definition for struct _node pointer operations.
-typedef _node* Node;
-
-/* Left and right node sons indexes. Elegido por el tema de generar
- * los indices adecuadamente al realizar las comparaciones.
- */
-static const int right = 0;
-static const int left  = 1;
-
-/*
- * Data collection representing the tree structure. It holds a
- * pointer to the root node and to the cmp function used to 
- * sort the elements.
- */
-typedef struct _tree_set
-{
-	Node root;
-	size_t size;
-	cmpf_t cmp;
-	//bool primitive_set; //NOT YET USED
-} _tree_set;
-
-
-//PRIVATE FUNCTION DECLARATIONS
+//STATIC FUNCTION DECLARATIONS
 static void _remove_nodes(Node n, bool free_elements);
-static bool _set_contains(Node n, cmpf_t cmp, void* e); 
 static Node _create_node(void* value);
 static Node _bst_insertion(Node* root, cmpf_t cmp, void* e);
 static void _restructure(TreeSet t, Node father);
@@ -115,9 +61,15 @@ bool set_add(TreeSet t, void* e)
 	if(new!=t->root && new->father->color==RED) _restructure(t, new);
 
 	t->root->color = BLACK;
+	t->size++;
 	return true;
 }
 
+
+/*
+ * Does the tree restructure to ensure that all properties are conserved and
+ * thus kept in balance.
+ */
 static void _restructure(TreeSet t, Node son)
 {
 	char rcase;
@@ -167,18 +119,28 @@ static void _restructure(TreeSet t, Node son)
 	}
 }
 
+/*
+ * Performs a simple left-left or right-right rotation based on leftcase flag
+ * value. This rotation consist of swapping father and grandfather positions 
+ * in the structure where grandfather would then be father's left or right son
+ * based on the kind of rotation. Father's and grandfather's colors are
+ * interchanged.
+ */
 static void _simple_rotation(TreeSet t, Node father, Node gf, bool leftcase)
 {
 	
+		//Swap colors
 		father->color = BLACK;
 		gf->color = RED;
 
 		int branch = leftcase? left:right;
 
+		//Perform rotation
 		gf->sons[branch] = NULL;
 		father->sons[!branch] = gf;
 		
 		Node subroot = gf->father;
+		//Check if gf is root, needed to update father's predecessor.
 		if(subroot==NULL)
 			t->root = father;
 		else
@@ -258,24 +220,21 @@ static void _remove_nodes(Node n, bool free_elements)
  */
 bool set_contains(TreeSet t, void* e)
 {
-	return _set_contains(t->root, t->cmp, e);
-}
+	Node current = t->root;
 
+	while(current!=NULL)
+	{
+		int c = t->cmp(current->value, e);
 
-/*
- * Checks for the presence of the specified element. The cmp 
- * function is used to check for equality. Returns true if 
- * contained, false otherwise.
- */
-static bool _set_contains(Node n, cmpf_t cmp, void* e)
-{
-	if(n==NULL) 
-		return false;
-	else if(cmp(n->value, e)==0)
-		return true;
+		if(c > 0)
+			current = current->sons[left];
+		else if(c < 0)
+			current = current->sons[right];
+		else
+			return true;
+	}
 	
-	return _set_contains(n->sons[left], cmp, e) 
-	    	|| _set_contains(n->sons[right], cmp, e);
+	return false;
 }
 
 

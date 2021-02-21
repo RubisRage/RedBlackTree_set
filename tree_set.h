@@ -1,3 +1,6 @@
+#ifndef TREESET_H
+#define TREESET_H
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -70,7 +73,7 @@ size_t set_size(TreeSet);
 void set_destroy(TreeSet, bool free_elements); 
 
 
-
+#endif /* TREESET_H */
 
 
 

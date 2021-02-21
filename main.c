@@ -1,5 +1,4 @@
 #include "tree_set.h"
-#include "test_header.h"
 #include <stdlib.h>
 #include <stdio.h>
 
