@@ -88,6 +88,7 @@ static void _restructure(TreeSet t, Node son)
 	if(uncle != NULL && uncle->color==RED)
 	{
 		father->color = uncle->color = BLACK;
+		gf->color = RED;
 		return;
 	}
 
@@ -100,27 +101,26 @@ static void _restructure(TreeSet t, Node son)
 	#define RLCASE 0x2
 	#define RRCASE 0x3
 
-	//PRINT STATEMENTS FOR DEBUGGING
 	switch(rcase)
 	{
-		case LLCASE: printf("LLCASE\n");
+		case LLCASE: 
 			_simple_rotation(t, father, gf, true);
 		break;
-		case LRCASE: printf("LRCASE\n");
+		case LRCASE:
 		{
 			father->sons[right] = NULL;
 			son->sons[left] = father;
 			_simple_rotation(t, son, gf, true);
 		}
 		break;
-		case RLCASE: printf("RLCASE\n");
+		case RLCASE:
 		{
 			father->sons[left] = NULL;
 			son->sons[right] = father;
 			_simple_rotation(t, son, gf, false);
 		}
 		break;
-		case RRCASE: printf("RRCASE\n");
+		case RRCASE:
 			_simple_rotation(t, father, gf, false);
 		break;
 	}

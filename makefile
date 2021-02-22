@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 CC = gcc
 CFLAGS = -g -Wall
 
@@ -15,11 +17,12 @@ SUBDIRS := $(patsubst $(SRC_DIR)%,$(BUILD_DIR)%,$(SUBDIRS))
 
 all: directories $(BIN)
 
-test: $(BIN)
-	-time $(BIN)
+test: directories $(BIN)
+	@time ./a.out
 
 $(BIN): $(OBJS) 
 	$(CC) $(CFLAGS) $^ -o $(BIN)
+	@echo 
 
 directories:
 	@mkdir -p $(SUBDIRS)

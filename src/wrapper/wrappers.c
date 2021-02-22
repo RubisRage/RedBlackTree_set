@@ -11,42 +11,58 @@ Int wInt(int v)
 
 int cmp_int(Int i1, Int i2)
 {
-	return i1->v > i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 int cmp_int_inv(Int i1, Int i2)
 {
-	return i1->v < i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 int cmp_float(Float i1, Float i2)
 {
-	return i1->v > i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 int cmp_float_inv(Float i1, Float i2)
 {
-	return i1->v < i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 int cmp_double(Double i1, Double i2)
 {
-	return i1->v > i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 int cmp_double_inv(Double i1, Double i2)
 {
-	return i1->v < i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 int cmp_char(Char i1, Char i2)
 {
-	return i1->v > i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 int cmp_char_inv(Char i1, Char i2)
 {
-	return i1->v < i2->v;
+	if(i1->v>i2->v) return 1;
+	else if(i1->v<i2->v) return -1;
+	else return 0;
 }
 
 void* wrapper_cmp(WrapperType type, bool inverted)
