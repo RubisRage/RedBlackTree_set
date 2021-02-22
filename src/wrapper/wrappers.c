@@ -1,28 +1,70 @@
-#include <stdlib.h>
 #include "wrappers.h"
+#include <stddef.h>
+#include <stdlib.h>
 
+Int wInt(int v)
+{
+	Int i = malloc(sizeof(struct _int));
+	i->v = v;
+	return i;
+}
 
-int cmp_wrp(void* i1, void* i2, WrapperType type)
+int cmp_int(Int i1, Int i2)
+{
+	return i1->v > i2->v;
+}
+
+int cmp_int_inv(Int i1, Int i2)
+{
+	return i1->v < i2->v;
+}
+
+int cmp_float(Float i1, Float i2)
+{
+	return i1->v > i2->v;
+}
+
+int cmp_float_inv(Float i1, Float i2)
+{
+	return i1->v < i2->v;
+}
+
+int cmp_double(Double i1, Double i2)
+{
+	return i1->v > i2->v;
+}
+
+int cmp_double_inv(Double i1, Double i2)
+{
+	return i1->v < i2->v;
+}
+
+int cmp_char(Char i1, Char i2)
+{
+	return i1->v > i2->v;
+}
+
+int cmp_char_inv(Char i1, Char i2)
+{
+	return i1->v < i2->v;
+}
+
+void* wrapper_cmp(WrapperType type, bool inverted)
 {
 	switch(type)
 	{
 		case IntType:
-			return ((Int) i1)->v > ((Int) i2)->v; 
+			return inverted? cmp_int_inv : cmp_int;
 		break;
 		case FloatType:
-			return ((Float) i1)->v > ((Float) i2)->v; 
+			return inverted? cmp_float_inv : cmp_float;
 		break;
 		case DoubleType:
-			return ((Double) i1)->v > ((Float) i2)->v; 
+			return inverted? cmp_double_inv : cmp_double;
 		break;
 		case CharType:
-			return ((Char) i1)->v > ((Char) i2)->v; 
+			return inverted? cmp_char_inv : cmp_char;
 	}
 
-	return 0;
-}
-
-int inv_cmp_wrp(void* i1, void* i2, WrapperType type)
-{
-	return -cmp_wrp(i1, i2, type);
+	return NULL;
 }
