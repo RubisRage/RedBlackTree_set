@@ -108,15 +108,27 @@ static void _restructure(TreeSet t, Node son)
 		break;
 		case LRCASE:
 		{
+			//Update successors
 			father->sons[right] = NULL;
 			son->sons[left] = father;
+
+			//Update predeccessors
+			father->father = son;
+			son->father = gf;
+
 			_simple_rotation(t, son, gf, true);
 		}
 		break;
 		case RLCASE:
 		{
+			//Update successors
 			father->sons[left] = NULL;
 			son->sons[right] = father;
+
+			//Update predeccessors
+			father->father = son;
+			son->father = gf;
+
 			_simple_rotation(t, son, gf, false);
 		}
 		break;
@@ -145,8 +157,14 @@ static void _simple_rotation(TreeSet t, Node father, Node gf, bool leftcase)
 		//Perform rotation
 		gf->sons[branch] = NULL;
 		father->sons[!branch] = gf;
-		
+
+		//Get this subtree's root. It stays invariant after the transformation
 		Node subroot = gf->father;
+
+		//Update predecessors 
+		father->father = subroot;
+		gf->father = father;
+		
 		//Check if gf is root, needed to update father's predecessor.
 		if(subroot==NULL)
 			t->root = father;
@@ -281,7 +299,7 @@ void _apply(Node n, void (*f)(void*))
 	if(n==NULL) return;
 
 	_apply(n->sons[left], f);
-	printf("color: %s -> ", n->color==RED? "RED":"BLACK");
+	printf("color: %s (%ld) ", n->color==RED? "RED":"BLACK", (long)n);
 	f(n->value);
 	_apply(n->sons[right], f);
 }
