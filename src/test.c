@@ -106,7 +106,19 @@ void int_contains_test()
 	set_add(t, wInt(100));
 	*/
 
-	//assert();
+	assert(set_contains(t, wInt(5)));
+	assert(set_contains(t, wInt(15)));
+	assert(set_contains(t, wInt(-10)));
+	assert(set_contains(t, wInt(-25)));
+	assert(set_contains(t, wInt(0)));
+	assert(set_contains(t, wInt(100)));
+
+	assert_false(set_contains(t, wInt(3)));
+	assert_false(set_contains(t, wInt(-8)));
+	assert_false(set_contains(t, wInt(-1000)));
+	assert_false(set_contains(t, wInt(99)));
+	assert_false(set_contains(t, wInt(101)));
+	assert_false(set_contains(t, wInt(1)));
 
 	set_destroy(t, true);
 }
@@ -123,6 +135,9 @@ void str_contains_test()
 
 	assert_false(set_contains(t,strings[5]));
 	assert_false(set_contains(t,strings[6]));
+	assert_false(set_contains(t, "Hola mundo"));
+	assert_false(set_contains(t, "This string is not contained"));
+	assert_false(set_contains(t, "Hello, world! English version"));
 }
 
 int main()

@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include "../wrapper/wrappers.h"
 
 /*
  * Type definition of a struct pointer encapsulating the set

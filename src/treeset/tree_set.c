@@ -26,7 +26,7 @@ void perrorx(const char* s)
  *		element. 
  *
  *		free_on_fail - Tells whether to free the passed
- * 		element on add fail. Mostly used for type wrappers.
+ * 		element on add fail. Mostly designed for type wrappers.
  */
 TreeSet create_treeset(void* cmp, bool free_on_fail)
 {
@@ -86,11 +86,11 @@ bool set_add(TreeSet t, void* e)
  */
 static void _restructure(TreeSet t, Node son)
 {
-	char rcase;
+	char fcase;
 	Node father = son->father;
 	Node gf = father->father;
-	//Store on rcase if father is right son(1) or left son(0)
-	Node uncle = (rcase=(father==gf->sons[right]))? gf->sons[left]:gf->sons[right];
+	//Store on fcase if father is right son(1) or left son(0)
+	Node uncle = (fcase=(father==gf->sons[right]))? gf->sons[left]:gf->sons[right];
 
 	if(uncle != NULL && uncle->color==RED)
 	{
@@ -99,54 +99,26 @@ static void _restructure(TreeSet t, Node son)
 		return;
 	}
 
-	/*Compute case based on relative positions between father,
-	  uncle and grandfather */
-	rcase = (rcase<<1)|(son==father->sons[right]);
+	/* Scase represents whether the son is his father's left/right son. It's value
+	   equals one when son is right child. */
+	char scase = (son==father->sons[right]);
 
-	#define LLCASE 0x0
-	#define LRCASE 0x1
-	#define RLCASE 0x2
-	#define RRCASE 0x3
-	
-	//REFACTOR THIS, TOO MUCH CODE REPEATED, USE TWO FLAGS: 1º FOR FATHER'S CASE
-	//2º FOR SON'S CASE. USE XOR OPERATION TO TELL IF IT IS EITHER LL/RRCASE
-	//OR LR/RLCASE THEN USE SON'S FLAG TO SAY WHETHER USE SIMPLE ROTATION LEFT
-	//OR RIGHT.
-	switch(rcase)
+	//if fcase != scase then it's left-right/right-left rotation case
+	if(scase ^ fcase)
 	{
-		case LLCASE: 
-			_simple_rotation(t, father, gf, true);
-		break;
-		case LRCASE:
-		{
-			//Update successors
-			father->sons[right] = NULL;
-			son->sons[left] = father;
+		//Update successors
+		father->sons[!(int)scase] = NULL;
+		son->sons[(int)scase] = father;
 
-			//Update predeccessors
-			father->father = son;
-			son->father = gf;
+		//Update predeccessors
+		father->father = son;
+		son->father = gf;
 
-			_simple_rotation(t, son, gf, true);
-		}
-		break;
-		case RLCASE:
-		{
-			//Update successors
-			father->sons[left] = NULL;
-			son->sons[right] = father;
-
-			//Update predeccessors
-			father->father = son;
-			son->father = gf;
-
-			_simple_rotation(t, son, gf, false);
-		}
-		break;
-		case RRCASE:
-			_simple_rotation(t, father, gf, false);
-		break;
+		_simple_rotation(t, son, gf, scase);
 	}
+	//simple left-left/right-right rotation case otherwise
+	else
+		_simple_rotation(t, father, gf, !scase);
 }
 
 /*
@@ -257,8 +229,9 @@ static void _remove_nodes(Node n, bool free_elements)
 bool set_contains(TreeSet t, void* e)
 {
 	Node current = t->root;
+	bool contained = false;
 
-	while(current!=NULL)
+	while(current!=NULL && !contained)
 	{
 		int c = t->cmp(current->value, e);
 
@@ -267,10 +240,13 @@ bool set_contains(TreeSet t, void* e)
 		else if(c < 0)
 			current = current->sons[right];
 		else
-			return true;
+			contained = true;
 	}
 	
-	return false;
+	if(t->free_on_fail) 
+		free(e);
+
+	return contained;
 }
 
 
