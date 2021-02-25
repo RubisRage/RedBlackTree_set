@@ -24,11 +24,15 @@ void perrorx(const char* s)
  *		function must have the following interface:
  *		int func(E,E) where E is the type of the 
  *		element. 
+ *
+ *		free_on_fail - Tells whether to free the passed
+ * 		element on add fail. Mostly used for type wrappers.
  */
-TreeSet create_treeset(void* cmp)
+TreeSet create_treeset(void* cmp, bool free_on_fail)
 {
 	TreeSet t = malloc(sizeof(_tree_set));
 	if(t==NULL) perrorx("Not enough memory to create a new TreeSet. Aborting.");
+	t->free_on_fail = free_on_fail;
 	t->root = NULL;
 	t->size = 0;
 	t->cmp = (cmpf_t) cmp; 
@@ -63,7 +67,10 @@ bool set_add(TreeSet t, void* e)
 {
 	Node new = _bst_insertion(&t->root, t->cmp, e);
 	if(new==NULL)
+	{
+		if(t->free_on_fail) free(e);
 		return false;
+	}
 
 	if(new!=t->root && new->father->color==RED) _restructure(t, new);
 
@@ -100,7 +107,11 @@ static void _restructure(TreeSet t, Node son)
 	#define LRCASE 0x1
 	#define RLCASE 0x2
 	#define RRCASE 0x3
-
+	
+	//REFACTOR THIS, TOO MUCH CODE REPEATED, USE TWO FLAGS: 1º FOR FATHER'S CASE
+	//2º FOR SON'S CASE. USE XOR OPERATION TO TELL IF IT IS EITHER LL/RRCASE
+	//OR LR/RLCASE THEN USE SON'S FLAG TO SAY WHETHER USE SIMPLE ROTATION LEFT
+	//OR RIGHT.
 	switch(rcase)
 	{
 		case LLCASE: 

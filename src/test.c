@@ -7,8 +7,9 @@
 #include <string.h>
 
 #define assert_false(x) assert(!x)
-#define run_test(str,test) printf("%s", str); test(); printf("\t\tOk\n");
+#define run_test(str,test) printf("%s", str); test(); printf("\x1b[32m""\t\tOk\n""\x1b[0m");
 
+TreeSet t;
 char* strings[] = { "Aaaaaaa",
 		  "Bbbbbbb",
 		  "Hola Mundo",
@@ -23,9 +24,33 @@ void print_tree(char* i)
 	printf("%s\n", i);
 }
 
+void int_setup()
+{
+	t = create_treeset(wrapper_cmp(IntType, false), true);
+
+	set_add(t, wInt(5));
+	set_add(t, wInt(15));
+	set_add(t, wInt(-10));
+	set_add(t, wInt(-25));
+	set_add(t, wInt(0));
+	set_add(t, wInt(100));
+
+}
+
+void str_setup()
+{
+	t = create_treeset(strcmp, false);
+
+	set_add(t,strings[0]);
+	set_add(t,strings[1]);
+	set_add(t,strings[2]);
+	set_add(t,strings[3]);
+	set_add(t,strings[4]);
+}
+
 void int_add_test()
 {
-	TreeSet t = create_treeset(wrapper_cmp(IntType, false));
+	TreeSet t = create_treeset(wrapper_cmp(IntType, false), true);
 
 	for(int i = -99; i < 100; i++)
 	{
@@ -47,7 +72,7 @@ void int_add_test()
 
 void str_add_test()
 {
-	TreeSet t = create_treeset(strcmp);
+	t = create_treeset(strcmp, false);
 
 	assert(set_add(t,strings[0]));
 	assert(set_add(t,strings[1]));
@@ -68,11 +93,46 @@ void str_add_test()
 	set_destroy(t, false);
 }
 
+void int_contains_test()
+{
+	int_setup();
+
+	/*
+	set_add(t, wInt(5));
+	set_add(t, wInt(15));
+	set_add(t, wInt(-10));
+	set_add(t, wInt(-25));
+	set_add(t, wInt(0));
+	set_add(t, wInt(100));
+	*/
+
+	//assert();
+
+	set_destroy(t, true);
+}
+
+void str_contains_test()
+{
+	str_setup();
+
+	assert(set_contains(t,strings[0]));
+	assert(set_contains(t,strings[1]));
+	assert(set_contains(t,strings[2]));
+	assert(set_contains(t,strings[3]));
+	assert(set_contains(t,strings[4]));
+
+	assert_false(set_contains(t,strings[5]));
+	assert_false(set_contains(t,strings[6]));
+}
+
 int main()
 {
-	printf("Starting test:\n");
+	printf("Starting tests:\n");
 	run_test(" - Int wrapper add test", int_add_test)
 	run_test(" - String add test", str_add_test)
+	run_test(" - Int contains test", int_contains_test)
+	run_test(" - String contains test", str_contains_test)
+	printf("\n\nAll tests passed successfully\n\n");
 
 	return EXIT_SUCCESS;
 }

@@ -52,7 +52,7 @@ typedef struct _tree_set
 	Node root;
 	size_t size;
 	cmpf_t cmp;
-	//bool primitive_set; //NOT YET USED
+	bool free_on_fail;
 } _tree_set;
 
 #endif /* PRIVATE_TREESET_H */

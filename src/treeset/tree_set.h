@@ -25,7 +25,7 @@ void apply(TreeSet, void*);
  *		int func(E,E) where E is the type of the 
  *		element. 
  */
-TreeSet create_treeset(void* cmp);
+TreeSet create_treeset(void* cmp, bool free_on_fail);
 
 
 /*
